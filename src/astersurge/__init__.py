@@ -3,23 +3,18 @@ AsterSurge
 
 Open-source AI infrastructure for building intelligent software.
 
-Version: 0.1.0
+Version: 0.2.0
 """
 
 from .agent import Agent
 from .planner import Planner
 from .memory import Memory
-from .tools import (
-    BaseTool,
-    ToolRegistry,
-)
-from .models import (
-    BaseModel,
-    ModelManager,
-)
+from .tools import BaseTool, ToolRegistry
+from .models import BaseModel, ModelManager
 from .config import Config
+from .factory import ProviderFactory
 
-__version__ = Config.VERSION
+__version__ = "0.2.0"
 
 __all__ = [
     "Agent",
@@ -30,4 +25,5 @@ __all__ = [
     "BaseModel",
     "ModelManager",
     "Config",
+    "ProviderFactory",
 ]
