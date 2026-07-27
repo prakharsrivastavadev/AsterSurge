@@ -13,6 +13,8 @@ from .tools import BaseTool, ToolRegistry
 from .models import BaseModel, ModelManager
 from .config import Config
 from .factory import ProviderFactory
+from .plugins import Plugin, PluginManager
+from .logger import Logger
 
 __version__ = "0.2.0"
 
@@ -26,4 +28,7 @@ __all__ = [
     "ModelManager",
     "Config",
     "ProviderFactory",
+    "Plugin",
+    "PluginManager",
+    "Logger",
 ]
