@@ -1,163 +1,132 @@
 # AsterSurge
 
-### Open-source AI infrastructure for building intelligent software.
+Open-source AI infrastructure for building intelligent software.
 
-**Build in Public • Community Driven • Developer First**
+## Features
 
----
+- 🤖 Multi-provider LLM support
+  - Groq
+  - OpenAI
+  - Google Gemini
+  - Ollama
 
-## Vision
+- 🧠 Persistent conversation memory
 
-Artificial intelligence should be open, understandable, and accessible to everyone.
+- 🔌 Plugin system
 
-AsterSurge is an open-source initiative dedicated to building modern AI infrastructure that empowers developers, researchers, students, and creators to build intelligent systems without unnecessary barriers.
+- 🛠 Built-in tools
 
-Rather than being a single application, AsterSurge aims to become a foundation for the next generation of intelligent software.
+- ⚡ FastAPI server
 
----
+- 💻 Command-line interface
 
-## Mission
-
-Our mission is simple:
-
-> Build transparent, extensible, and community-driven AI infrastructure that empowers developers worldwide.
-
-Everything developed within AsterSurge follows these core principles:
-
-- Transparency
-- Simplicity
-- Extensibility
-- Privacy
-- Reliability
-- Open Collaboration
+- 📦 Installable Python package
 
 ---
 
-## Current Status
+## Installation
 
-🚧 **Foundation Stage**
+Clone the repository:
 
-AsterSurge is currently in active early development.
+```bash
+git clone https://github.com/prakharsrivastavadev/AsterSurge.git
+cd AsterSurge
+```
 
-The project focuses on building a strong architectural foundation, documenting ideas publicly, and establishing engineering standards before implementing larger features.
+Install:
 
-We believe sustainable open-source software begins with thoughtful design, transparency, and continuous learning.
+```bash
+pip install -e .
+```
 
----
+Or:
 
-## Long-Term Goals
-
-The long-term vision for AsterSurge includes:
-
-- AI Agent Frameworks
-- Developer SDKs
-- Local & Cloud AI Integrations
-- Browser Automation
-- Workflow Automation
-- Plugin Ecosystem
-- Memory & Context Systems
-- AI Utilities
-- Open APIs
-- Documentation-first Development
-
-These represent the project's direction and roadmap—not completed functionality.
+```bash
+pip install -r requirements.txt
+```
 
 ---
 
-## Why Open Source?
+## Environment
 
-Knowledge becomes more valuable when it is shared.
+Copy:
 
-AsterSurge exists because we believe innovation accelerates when developers build together. By developing in public, documenting decisions openly, and welcoming contributors from around the world, we hope to create software that benefits everyone.
+```text
+.env.example
+```
 
----
+to
 
-## Contributing
+```text
+.env
+```
 
-Everyone is welcome.
+and configure your API keys.
 
-You don't need to be an AI expert to contribute.
+Example:
 
-You can help by:
-
-- Improving documentation
-- Reporting bugs
-- Suggesting ideas
-- Reviewing code
-- Writing features
-- Improving tests
-- Helping other contributors
-
-Every contribution, no matter how small, moves the project forward.
+```env
+GROQ_API_KEY=your_key
+OPENAI_API_KEY=your_key
+GEMINI_API_KEY=your_key
+```
 
 ---
 
-## Roadmap
+## CLI
 
-### Phase 1 — Foundation
+```bash
+astersurge version
+```
 
-- [ ] Project architecture
-- [ ] Documentation
-- [ ] Engineering standards
-- [ ] Community guidelines
+```bash
+astersurge providers
+```
 
-### Phase 2 — Core
+```bash
+astersurge config
+```
 
-- [ ] AI framework
-- [ ] Developer SDK
-- [ ] Plugin architecture
-- [ ] APIs
-
-### Phase 3 — Ecosystem
-
-- [ ] Stable releases
-- [ ] Developer tools
-- [ ] Community growth
-- [ ] Long-term maintenance
+```bash
+astersurge chat "Hello!"
+```
 
 ---
 
-## Core Values
+## API
 
-- Build in Public
-- Open by Default
-- Quality over Hype
-- Honest about Progress
-- Learn Continuously
-- Respect Every Contributor
+Run:
 
----
+```bash
+uvicorn astersurge.api:app --reload
+```
 
-## About
+Open:
 
-AsterSurge is an independent open-source initiative created with a simple belief:
-
-> Great technology should be built in the open, shared with everyone, and improved through collaboration.
-
-This project is just beginning its journey. While the codebase is still growing, the vision is long-term: to build practical, transparent, and developer-first AI infrastructure that anyone can use, learn from, and improve.
-
-Every successful open-source project began with a single repository, a clear vision, and a community willing to build together.
+```
+http://127.0.0.1:8000/docs
+```
 
 ---
 
-## About the Creator
+## Supported Providers
 
-Hi, I'm **Prakhar Srivastava**, a **16-year-old student** from India passionate about artificial intelligence, software engineering, and open-source development.
+- Groq
+- OpenAI
+- Google Gemini
+- Ollama
 
-I started AsterSurge to learn by building in public and to contribute meaningful AI infrastructure that developers around the world can use, improve, and build upon.
+---
 
-While I am at the beginning of my journey, I believe curiosity, consistency, and collaboration matter more than having a large team or unlimited resources. Every great open-source project starts somewhere, and AsterSurge is my commitment to learning, contributing, and building in the open.
+## Project Structure
 
-My long-term goal is to create transparent, accessible, and community-driven AI technologies that empower developers worldwide.
-
-If this vision resonates with you, feel free to star the repository, open an issue, suggest improvements, or contribute.
-
-**Every meaningful project starts with a single commit.**
+```text
+src/
+└── astersurge/
+```
 
 ---
 
 ## License
 
-This project is licensed under the **MIT License**.
-
-> **Open source today. Built for tomorrow.**
+MIT License
