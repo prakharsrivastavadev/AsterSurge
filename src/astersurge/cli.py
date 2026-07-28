@@ -1,88 +1,87 @@
 """
 AsterSurge CLI
 
-Command Line Interface
-
-Version: 0.1
+Version: 0.3.0
 """
 
 import argparse
 
 from .agent import Agent
 from .config import Config
+from .factory import ProviderFactory
 
 
 def main():
     parser = argparse.ArgumentParser(
         prog="astersurge",
-        description="AsterSurge AI Infrastructure CLI",
+        description="AsterSurge AI Framework",
     )
 
-    parser.add_argument(
-        "task",
-        nargs="?",
-        help="Task for the agent",
+    subparsers = parser.add_subparsers(
+        dest="command",
     )
 
-    parser.add_argument(
-        "--history",
-        action="store_true",
-        help="Show conversation history",
+    chat_parser = subparsers.add_parser(
+        "chat",
+        help="Chat with AsterSurge",
     )
 
-    parser.add_argument(
-        "--config",
-        action="store_true",
+    chat_parser.add_argument(
+        "prompt",
+        nargs="+",
+        help="Prompt to send",
+    )
+
+    subparsers.add_parser(
+        "providers",
+        help="List available providers",
+    )
+
+    subparsers.add_parser(
+        "config",
         help="Show configuration",
     )
 
-    parser.add_argument(
-        "--version",
-        action="store_true",
+    subparsers.add_parser(
+        "version",
         help="Show version",
     )
 
     args = parser.parse_args()
 
-    if args.version:
-        print(f"{Config.APP_NAME} {Config.VERSION}")
+    if args.command == "version":
+        print(
+            f"{Config.APP_NAME} {Config.VERSION}"
+        )
         return
 
-    if args.config:
-        Config.print_config()
+    if args.command == "config":
+        for key, value in Config.as_dict().items():
+            print(f"{key}: {value}")
         return
 
-    agent = Agent()
-
-    if args.history:
-        history = agent.history()
-
-        if not history:
-            print("No conversation history.")
-            return
-
-        for message in history:
-            print(
-                f"[{message['role']}] {message['content']}"
+    if args.command == "providers":
+        print(
+            "\n".join(
+                ProviderFactory.available()
             )
+        )
         return
 
-    if args.task:
-        result = agent.run(args.task)
+    if args.command == "chat":
+        prompt = " ".join(args.prompt)
 
-        print("\nTask:")
-        print(result["task"])
+        agent = Agent(
+            provider=Config.PROVIDER,
+            model=Config.MODEL,
+        )
 
-        print("\nExecution Plan:")
-        for step in result["plan"]:
-            print(f"- {step['description']}")
+        response = agent.chat(prompt)
 
-        print("\nResults:")
-        for item in result["results"]:
-            print(f"- {item['step']}: {item['output']}")
+        print(response)
+        return
 
-    else:
-        parser.print_help()
+    parser.print_help()
 
 
 if __name__ == "__main__":
