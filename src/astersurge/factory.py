@@ -1,9 +1,11 @@
 """
 AsterSurge Provider Factory
 
-Creates provider instances from configuration.
+Version: 0.3.0
 """
 
+from .config import Config
+from .validators import Validator
 from .providers import (
     GroqProvider,
     OpenAIProvider,
@@ -14,10 +16,10 @@ from .providers import (
 
 class ProviderFactory:
     """
-    Factory for creating LLM providers.
+    Factory responsible for creating LLM providers.
     """
 
-    PROVIDERS = {
+    _providers = {
         "groq": GroqProvider,
         "openai": OpenAIProvider,
         "gemini": GeminiProvider,
@@ -25,24 +27,65 @@ class ProviderFactory:
     }
 
     @classmethod
-    def create(cls, provider: str, **kwargs):
+    def create(
+        cls,
+        provider=None,
+        model=None,
+        **kwargs,
+    ):
         """
         Create a provider instance.
-
-        Example:
-            ProviderFactory.create("groq")
         """
 
-        provider = provider.lower()
+        provider = (
+            provider
+            or Config.PROVIDER
+        ).lower()
 
-        if provider not in cls.PROVIDERS:
-            available = ", ".join(cls.PROVIDERS.keys())
-            raise ValueError(
-                f"Unknown provider '{provider}'. "
-                f"Available providers: {available}"
-            )
+        Validator.provider(
+            provider,
+            cls._providers.keys(),
+        )
 
-        return cls.PROVIDERS[provider](**kwargs)
+        provider_class = cls._providers[
+            provider
+        ]
+
+        if model is None:
+            model = Config.MODEL
+
+        return provider_class(
+            model=model,
+            **kwargs,
+        )
+
+    @classmethod
+    def register(
+        cls,
+        name,
+        provider_class,
+    ):
+        """
+        Register a custom provider.
+        """
+
+        cls._providers[
+            name.lower()
+        ] = provider_class
+
+    @classmethod
+    def unregister(
+        cls,
+        name,
+    ):
+        """
+        Remove a provider.
+        """
+
+        cls._providers.pop(
+            name.lower(),
+            None,
+        )
 
     @classmethod
     def available(cls):
@@ -50,4 +93,20 @@ class ProviderFactory:
         Return available providers.
         """
 
-        return sorted(cls.PROVIDERS.keys())
+        return sorted(
+            cls._providers.keys()
+        )
+
+    @classmethod
+    def exists(
+        cls,
+        name,
+    ):
+        """
+        Check whether a provider exists.
+        """
+
+        return (
+            name.lower()
+            in cls._providers
+        )
