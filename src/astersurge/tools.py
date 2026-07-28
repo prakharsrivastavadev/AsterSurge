@@ -1,101 +1,133 @@
 """
 AsterSurge Tools
 
-Built-in tools and tool registry.
-
-Version: 0.1
+Version: 0.3.0
 """
 
+from abc import ABC, abstractmethod
 from datetime import datetime
-import os
+from pathlib import Path
 
 
-class BaseTool:
-    """Base class for all tools."""
+class BaseTool(ABC):
+    """
+    Base class for all tools.
+    """
 
-    name = "base"
+    name = "tool"
     description = "Base tool"
 
-    def run(self, input_data):
-        raise NotImplementedError
+    @abstractmethod
+    def run(self, *args, **kwargs):
+        pass
 
 
 class EchoTool(BaseTool):
-    name = "echo"
-    description = "Returns the provided input."
 
-    def run(self, input_data):
-        return input_data
+    name = "echo"
+    description = "Echo input."
+
+    def run(self, text):
+        return text
 
 
 class DateTimeTool(BaseTool):
-    name = "datetime"
-    description = "Returns the current date and time."
 
-    def run(self, input_data=None):
-        return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    name = "datetime"
+    description = "Current date and time."
+
+    def run(self):
+        return datetime.now().isoformat()
 
 
 class CalculatorTool(BaseTool):
+
     name = "calculator"
-    description = "Evaluates basic mathematical expressions."
+    description = "Evaluate arithmetic."
 
-    def run(self, input_data):
+    def run(self, expression):
 
-        expression = input_data.replace("calculate", "").strip()
+        allowed = {
+            "__builtins__": {}
+        }
 
-        try:
-            allowed = {
-                "__builtins__": {}
-            }
-
-            result = eval(expression, allowed, {})
-
-            return result
-
-        except Exception as e:
-            return f"Calculation Error: {e}"
+        return eval(expression, allowed, {})
 
 
 class FileReaderTool(BaseTool):
+
     name = "file_reader"
-    description = "Reads a local text file."
+    description = "Read UTF-8 text file."
 
-    def run(self, input_data):
+    def run(self, path):
 
-        path = input_data.replace("read", "").replace("open", "").replace("file", "").strip()
+        path = Path(path)
 
-        if not os.path.exists(path):
-            return "File not found."
+        if not path.exists():
+            raise FileNotFoundError(path)
 
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                return f.read()
-
-        except Exception as e:
-            return str(e)
+        return path.read_text(
+            encoding="utf-8"
+        )
 
 
 class ToolRegistry:
-    """Registry for built-in tools."""
+    """
+    Tool registry.
+    """
 
     def __init__(self):
 
-        self.tools = {
-            "echo": EchoTool(),
-            "datetime": DateTimeTool(),
-            "calculator": CalculatorTool(),
-            "file_reader": FileReaderTool(),
-        }
+        self._tools = {}
+
+        self.register(EchoTool())
+        self.register(DateTimeTool())
+        self.register(CalculatorTool())
+        self.register(FileReaderTool())
 
     def register(self, tool):
 
-        self.tools[tool.name] = tool
+        self._tools[tool.name] = tool
+
+    def unregister(self, name):
+
+        self._tools.pop(name, None)
 
     def get(self, name):
 
-        return self.tools.get(name)
+        return self._tools.get(name)
 
-    def list_tools(self):
+    def execute(
+        self,
+        name,
+        *args,
+        **kwargs,
+    ):
 
-        return list(self.tools.keys())
+        tool = self.get(name)
+
+        if tool is None:
+            raise ValueError(
+                f"Unknown tool '{name}'."
+            )
+
+        return tool.run(
+            *args,
+            **kwargs,
+        )
+
+    def list(self):
+
+        return sorted(
+            self._tools.keys()
+        )
+
+    def count(self):
+
+        return len(
+            self._tools
+        )
+
+    def clear(self):
+
+        self._tools.clear()
