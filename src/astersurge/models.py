@@ -1,73 +1,94 @@
 """
 AsterSurge Models
 
-Model abstraction layer.
-
-Version: 0.1
+Version: 0.3.0
 """
 
+from .factory import ProviderFactory
 
-class BaseModel:
-    """Base interface for all language models."""
 
-    def __init__(self, name="base-model"):
-        self.name = name
+class Model:
+    """
+    Wrapper around a language model provider.
+    """
 
-    def generate(self, prompt: str):
-        """
-        Generate a response.
+    def __init__(
+        self,
+        provider="groq",
+        model=None,
+    ):
+        self.provider_name = provider
 
-        Must be implemented by subclasses.
-        """
-        raise NotImplementedError(
-            "Subclasses must implement generate()."
+        self.provider = ProviderFactory.create(
+            provider,
+            model=model,
         )
 
+    def generate(
+        self,
+        prompt: str,
+        system_prompt="You are AsterSurge AI.",
+        **kwargs,
+    ):
+        """
+        Generate a response.
+        """
 
-class EchoModel(BaseModel):
-    """
-    Simple demonstration model.
-
-    Returns the prompt without modification.
-    """
-
-    def __init__(self):
-        super().__init__("echo")
-
-    def generate(self, prompt: str):
-        return prompt
+        return self.provider.generate(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            **kwargs,
+        )
 
 
 class ModelManager:
     """
-    Registers and retrieves models.
+    Manage multiple models.
     """
 
     def __init__(self):
-
         self._models = {}
 
-        self.register(EchoModel())
+    def register(
+        self,
+        name,
+        provider="groq",
+        model=None,
+    ):
+        self._models[name] = Model(
+            provider=provider,
+            model=model,
+        )
 
-    def register(self, model: BaseModel):
-
-        self._models[model.name] = model
-
-    def get(self, name: str):
-
+    def get(self, name):
         return self._models.get(name)
 
-    def available(self):
-
-        return sorted(self._models.keys())
-
-    def generate(self, model_name: str, prompt: str):
-
-        model = self.get(model_name)
+    def generate(
+        self,
+        name,
+        prompt,
+        **kwargs,
+    ):
+        model = self.get(name)
 
         if model is None:
             raise ValueError(
-                f"Unknown model: {model_name}"
+                f"Model '{name}' is not registered."
             )
 
-        return model.generate(prompt)
+        return model.generate(
+            prompt,
+            **kwargs,
+        )
+
+    def unregister(self, name):
+        self._models.pop(name, None)
+
+    def list(self):
+        return sorted(self._models.keys())
+
+    def clear(self):
+        self._models.clear()
+
+    def count(self):
+        return len(self._models)
