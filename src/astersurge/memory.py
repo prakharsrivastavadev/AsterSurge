@@ -1,65 +1,79 @@
 """
 AsterSurge Memory
 
-Simple in-memory conversation storage.
-
-Version: 0.1
+Version: 0.3.0
 """
+
+from pathlib import Path
+import json
 
 
 class Memory:
-    """Stores conversation history."""
+    """
+    Persistent conversation memory.
+    """
 
-    def __init__(self):
-        self._messages = []
+    def __init__(
+        self,
+        path="memory.json",
+    ):
+        self.path = Path(path)
+        self.messages = []
 
-    def add(self, role: str, content: str):
-        """
-        Add a message to memory.
+        self.load()
 
-        Parameters
-        ----------
-        role : str
-            "user", "assistant", or "system"
-
-        content : str
-            Message content.
-        """
-
-        self._messages.append(
+    def add(
+        self,
+        role,
+        content,
+    ):
+        self.messages.append(
             {
                 "role": role,
                 "content": content,
             }
         )
 
-    def history(self):
-        """
-        Return conversation history.
-        """
+        self.save()
 
-        return self._messages.copy()
+    def history(self):
+        return self.messages
 
     def last(self):
-        """
-        Return the latest message.
-        """
+        if self.messages:
+            return self.messages[-1]
 
-        if not self._messages:
-            return None
-
-        return self._messages[-1]
+        return None
 
     def clear(self):
-        """
-        Clear all stored messages.
-        """
-
-        self._messages.clear()
+        self.messages.clear()
+        self.save()
 
     def size(self):
-        """
-        Return number of stored messages.
-        """
+        return len(self.messages)
 
-        return len(self._messages)
+    def save(self):
+        with self.path.open(
+            "w",
+            encoding="utf-8",
+        ) as file:
+            json.dump(
+                self.messages,
+                file,
+                indent=4,
+                ensure_ascii=False,
+            )
+
+    def load(self):
+        if not self.path.exists():
+            return
+
+        try:
+            with self.path.open(
+                "r",
+                encoding="utf-8",
+            ) as file:
+                self.messages = json.load(file)
+
+        except Exception:
+            self.messages = []
