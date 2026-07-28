@@ -1,40 +1,62 @@
 """
 AsterSurge Agent
 
-Minimal agent implementation for AsterSurge.
-
-Version: 0.1
+Version: 0.3.0
 """
 
 from .planner import Planner
 from .memory import Memory
 from .tools import ToolRegistry
+from .factory import ProviderFactory
+from .prompts import Prompts
 
 
 class Agent:
-    """A simple AI agent."""
+    """
+    Main AsterSurge Agent.
+    """
 
-    def __init__(self):
-        self.memory = Memory()
+    def __init__(
+        self,
+        provider="groq",
+        model=None,
+    ):
         self.planner = Planner()
+        self.memory = Memory()
         self.tools = ToolRegistry()
+
+        self.provider = ProviderFactory.create(
+            provider,
+            model=model,
+        )
+
+    def chat(
+        self,
+        prompt: str,
+        system_prompt=None,
+    ):
+        """
+        Chat directly with the configured LLM.
+        """
+
+        self.memory.add("user", prompt)
+
+        response = self.provider.generate(
+            prompt,
+            system_prompt or Prompts.SYSTEM,
+        )
+
+        self.memory.add(
+            "assistant",
+            response,
+        )
+
+        return response
 
     def run(self, task: str):
         """
         Execute a task.
-
-        Parameters
-        ----------
-        task : str
-            User task.
-
-        Returns
-        -------
-        dict
-            Agent execution result.
         """
-
-        self.memory.add("user", task)
 
         plan = self.planner.create_plan(task)
 
@@ -42,12 +64,17 @@ class Agent:
 
         for step in plan:
 
-            tool = self.tools.get(step["tool"])
+            tool = self.tools.get(
+                step["tool"]
+            )
 
-            if tool is None:
-                output = f"Tool '{step['tool']}' not found."
+            if tool:
+
+                output = tool.run(task)
+
             else:
-                output = tool.run(step["input"])
+
+                output = self.chat(task)
 
             results.append(
                 {
@@ -56,8 +83,6 @@ class Agent:
                 }
             )
 
-        self.memory.add("assistant", str(results))
-
         return {
             "task": task,
             "plan": plan,
@@ -65,9 +90,7 @@ class Agent:
         }
 
     def history(self):
-        """Return conversation history."""
         return self.memory.history()
 
     def clear(self):
-        """Clear conversation history."""
         self.memory.clear()
