@@ -1,20 +1,25 @@
 """
 AsterSurge API
 
-Version: 0.2.0
+Version: 0.3.0
 """
 
 from fastapi import FastAPI
 from pydantic import BaseModel
 
 from .agent import Agent
+from .config import Config
+from .factory import ProviderFactory
 
 app = FastAPI(
     title="AsterSurge",
-    version="0.2.0",
+    version=Config.VERSION,
 )
 
-agent = Agent()
+agent = Agent(
+    provider=Config.PROVIDER,
+    model=Config.MODEL,
+)
 
 
 class ChatRequest(BaseModel):
@@ -28,8 +33,10 @@ class ChatResponse(BaseModel):
 @app.get("/")
 def root():
     return {
-        "name": "AsterSurge",
-        "version": "0.2.0",
+        "name": Config.APP_NAME,
+        "version": Config.VERSION,
+        "provider": Config.PROVIDER,
+        "model": Config.MODEL,
         "status": "running",
     }
 
@@ -41,21 +48,26 @@ def health():
     }
 
 
+@app.get("/version")
+def version():
+    return {
+        "version": Config.VERSION,
+    }
+
+
+@app.get("/providers")
+def providers():
+    return {
+        "providers": ProviderFactory.available(),
+    }
+
+
+@app.get("/config")
+def configuration():
+    return Config.as_dict()
+
+
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
-    result = agent.run(request.prompt)
-
-    output = ""
-
-    if isinstance(result, dict):
-        if "results" in result:
-            output = "\n".join(
-                str(item.get("output", ""))
-                for item in result["results"]
-            )
-        else:
-            output = str(result)
-    else:
-        output = str(result)
-
-    return ChatResponse(response=output)
+    response = agent.chat(request.prompt)
+    return ChatResponse(response=response)
