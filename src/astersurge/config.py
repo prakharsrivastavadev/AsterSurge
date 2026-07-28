@@ -1,56 +1,96 @@
 """
 AsterSurge Configuration
 
-Centralized configuration management.
-
-Version: 0.1
+Version: 0.3.0
 """
 
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class Config:
-    """Application configuration."""
+    """
+    Global configuration.
+    """
 
     APP_NAME = "AsterSurge"
-    VERSION = "0.1.0"
+    VERSION = "0.3.0"
 
-    DEFAULT_MODEL = os.getenv(
-        "ASTERSURGE_MODEL",
-        "echo"
+    BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+    PROVIDER = os.getenv(
+        "ASTERSURGE_PROVIDER",
+        "groq",
     )
 
-    DEBUG = os.getenv(
-        "ASTERSURGE_DEBUG",
-        "False"
-    ).lower() == "true"
+    MODEL = os.getenv(
+        "ASTERSURGE_MODEL",
+        "llama-3.3-70b-versatile",
+    )
+
+    GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+    OLLAMA_HOST = os.getenv(
+        "OLLAMA_HOST",
+        "http://localhost:11434",
+    )
+
+    TEMPERATURE = float(
+        os.getenv(
+            "ASTERSURGE_TEMPERATURE",
+            "0.2",
+        )
+    )
+
+    MAX_TOKENS = int(
+        os.getenv(
+            "ASTERSURGE_MAX_TOKENS",
+            "1024",
+        )
+    )
+
+    TIMEOUT = int(
+        os.getenv(
+            "ASTERSURGE_TIMEOUT",
+            "120",
+        )
+    )
+
+    DEBUG = (
+        os.getenv(
+            "ASTERSURGE_DEBUG",
+            "false",
+        ).lower()
+        == "true"
+    )
 
     LOG_LEVEL = os.getenv(
         "ASTERSURGE_LOG_LEVEL",
-        "INFO"
-    )
-
-    DATA_DIR = os.getenv(
-        "ASTERSURGE_DATA_DIR",
-        "./data"
+        "INFO",
     )
 
     @classmethod
     def as_dict(cls):
-        """Return configuration as a dictionary."""
-
         return {
             "app_name": cls.APP_NAME,
             "version": cls.VERSION,
-            "default_model": cls.DEFAULT_MODEL,
+            "provider": cls.PROVIDER,
+            "model": cls.MODEL,
+            "temperature": cls.TEMPERATURE,
+            "max_tokens": cls.MAX_TOKENS,
+            "timeout": cls.TIMEOUT,
             "debug": cls.DEBUG,
             "log_level": cls.LOG_LEVEL,
-            "data_dir": cls.DATA_DIR,
         }
 
     @classmethod
-    def print_config(cls):
-        """Print current configuration."""
-
-        for key, value in cls.as_dict().items():
-            print(f"{key}: {value}")
+    def get(cls, key, default=None):
+        return getattr(cls, key, default)
