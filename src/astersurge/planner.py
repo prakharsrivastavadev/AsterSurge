@@ -1,65 +1,119 @@
 """
 AsterSurge Planner
 
-Minimal task planner for AsterSurge.
-
-Version: 0.1
+Version: 0.3.0
 """
 
 
 class Planner:
-    """Simple rule-based planner."""
+    """
+    Rule-based planner that converts a task
+    into executable steps.
+    """
 
     def create_plan(self, task: str):
         """
-        Convert a user task into executable steps.
-
-        Parameters
-        ----------
-        task : str
-            User request.
-
-        Returns
-        -------
-        list
-            List of execution steps.
+        Create an execution plan.
         """
-
-        task = task.strip()
 
         task_lower = task.lower()
 
-        if any(word in task_lower for word in ["calculate", "add", "subtract", "multiply", "divide"]):
-            return [
+        plan = []
+
+        if any(
+            word in task_lower
+            for word in (
+                "calculate",
+                "math",
+                "add",
+                "subtract",
+                "multiply",
+                "divide",
+            )
+        ):
+            plan.append(
                 {
-                    "description": "Perform calculation",
                     "tool": "calculator",
-                    "input": task,
+                    "description": "Perform calculation",
+                    "action": task,
                 }
-            ]
+            )
 
-        if any(word in task_lower for word in ["time", "date", "today", "clock"]):
-            return [
+        elif any(
+            word in task_lower
+            for word in (
+                "date",
+                "time",
+                "today",
+                "clock",
+            )
+        ):
+            plan.append(
                 {
-                    "description": "Get current date and time",
                     "tool": "datetime",
-                    "input": task,
+                    "description": "Get current date and time",
+                    "action": None,
                 }
-            ]
+            )
 
-        if any(word in task_lower for word in ["read", "file", "open"]):
-            return [
+        elif any(
+            word in task_lower
+            for word in (
+                "read",
+                "open",
+                "file",
+            )
+        ):
+            plan.append(
                 {
-                    "description": "Read file",
                     "tool": "file_reader",
-                    "input": task,
+                    "description": "Read file",
+                    "action": task,
                 }
-            ]
+            )
+
+        else:
+            plan.append(
+                {
+                    "tool": "llm",
+                    "description": "Generate response using configured LLM",
+                    "action": task,
+                }
+            )
+
+        return plan
+
+    def validate(self, plan):
+        """
+        Validate an execution plan.
+        """
+
+        if not isinstance(plan, list):
+            raise TypeError(
+                "Plan must be a list."
+            )
+
+        required = {
+            "tool",
+            "description",
+            "action",
+        }
+
+        for step in plan:
+
+            if not required.issubset(step):
+                raise ValueError(
+                    "Invalid execution step."
+                )
+
+        return True
+
+    def explain(self, plan):
+        """
+        Return readable descriptions.
+        """
 
         return [
-            {
-                "description": "Echo task",
-                "tool": "echo",
-                "input": task,
-            }
-      ]
+            step["description"]
+            for step in plan
+        ]
