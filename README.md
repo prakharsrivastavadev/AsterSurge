@@ -1,6 +1,6 @@
 # AsterSurge
 
-Open-source AI infrastructure for building intelligent software..
+Open-source AI infrastructure for building intelligent software.
 
 ## Features
 
